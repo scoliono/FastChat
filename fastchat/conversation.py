@@ -39,6 +39,7 @@ class SeparatorStyle(IntEnum):
     GEMMA = auto()
     CLLM = auto()
     DEFAULT = auto()
+    NONE = auto()
 
 
 IMAGE_PLACEHOLDER_STR = "$$<image>$$"
@@ -67,7 +68,7 @@ class Conversation:
     sep: str = "\n"
     sep2: str = None
     # Stop criteria (the default one is EOS token)
-    stop_str: Union[str, List[str]] = None
+    stop_str: Union[str, List[str]] = "#"
     # Stops generation if meeting any token in this list
     stop_token_ids: List[int] = None
     # The maximum image size in megabytes that this model takes in. None means we do not resize the image.
@@ -95,9 +96,9 @@ class Conversation:
                     if type(message) is tuple:
                         message, images = message
                         message = IMAGE_PLACEHOLDER_STR * len(images) + message
-                    ret += role + ": " + message + seps[i % 2]
+                    ret += role + message + seps[i % 2]
                 else:
-                    ret += role + ":"
+                    ret += role
             return ret
         elif self.sep_style == SeparatorStyle.ADD_COLON_SPACE_SINGLE:
             ret = system_prompt + self.sep
@@ -725,32 +726,13 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="one_shot",
-        system_message="A chat between a curious human and an artificial intelligence assistant. "
-        "The assistant gives helpful, detailed, and polite answers to the human's questions.",
-        roles=("Human", "Assistant"),
-        messages=(
-            (
-                "Human",
-                "Got any creative ideas for a 10 year old’s birthday?",
-            ),
-            (
-                "Assistant",
-                """Of course! Here are some creative ideas for a 10-year-old's birthday party:
-1. Treasure Hunt: Organize a treasure hunt in your backyard or nearby park. Create clues and riddles for the kids to solve, leading them to hidden treasures and surprises.
-2. Science Party: Plan a science-themed party where kids can engage in fun and interactive experiments. You can set up different stations with activities like making slime, erupting volcanoes, or creating simple chemical reactions.
-3. Outdoor Movie Night: Set up a backyard movie night with a projector and a large screen or white sheet. Create a cozy seating area with blankets and pillows, and serve popcorn and snacks while the kids enjoy a favorite movie under the stars.
-4. DIY Crafts Party: Arrange a craft party where kids can unleash their creativity. Provide a variety of craft supplies like beads, paints, and fabrics, and let them create their own unique masterpieces to take home as party favors.
-5. Sports Olympics: Host a mini Olympics event with various sports and games. Set up different stations for activities like sack races, relay races, basketball shooting, and obstacle courses. Give out medals or certificates to the participants.
-6. Cooking Party: Have a cooking-themed party where the kids can prepare their own mini pizzas, cupcakes, or cookies. Provide toppings, frosting, and decorating supplies, and let them get hands-on in the kitchen.
-7. Superhero Training Camp: Create a superhero-themed party where the kids can engage in fun training activities. Set up an obstacle course, have them design their own superhero capes or masks, and organize superhero-themed games and challenges.
-8. Outdoor Adventure: Plan an outdoor adventure party at a local park or nature reserve. Arrange activities like hiking, nature scavenger hunts, or a picnic with games. Encourage exploration and appreciation for the outdoors.
-Remember to tailor the activities to the birthday child's interests and preferences. Have a great celebration!""",
-            ),
-        ),
-        offset=2,
-        sep_style=SeparatorStyle.ADD_COLON_SINGLE,
-        sep="\n### ",
-        stop_str="###",
+        system_message="",
+        roles=("", ""),
+        messages=(),
+        offset=0,
+        sep_style=SeparatorStyle.ADD_COLON_TWO,
+        sep="",
+        stop_str="",
     )
 )
 
